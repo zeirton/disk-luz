@@ -56,22 +56,29 @@
 </header>
 
 <main>
+  <main>
   <h2>Registrar Reclamação</h2>
 
-  <label>Nome completo</label>
-  <input type="text">
+  <form>
+    <label>Nome completo</label>
+    <input type="text" required>
 
-  <label>Data de nascimento</label>
-  <input type="date">
+    <label>Data de nascimento</label>
+    <input type="date" required>
 
-  <label>Endereço completo</label>
-  <input type="text">
+    <label>Endereço completo</label>
+    <input type="text" required>
 
-  <label>Telefone / WhatsApp</label>
-  <input type="text">
+    <label>Telefone / WhatsApp</label>
+    <input type="text" required>
 
-  <button>Enviar Reclamação</button>
+    <label>Descrição do problema</label>
+    <textarea rows="4" required></textarea>
+
+    <button type="submit">Enviar Reclamação</button>
+  </form>
 </main>
+
 
 <footer>
   Prefeitura Municipal – Serviço de Iluminação Pública
