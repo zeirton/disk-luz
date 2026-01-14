@@ -43,6 +43,7 @@
       padding: 8px;
       margin-top: 5px;
       box-sizing: border-box;
+      font-size: 14px;
     }
 
     button {
@@ -79,15 +80,19 @@
   <form onsubmit="enviarReclamacao(event)">
     
     <label>Nome completo</label>
-    <input type="text" id="nome" required>
+    <input type="text" required>
 
     <label>Endereço</label>
-    <input type="text" id="endereco" required>
+    <input type="text" required>
 
     <label>Descrição do problema</label>
-    <textarea id="descricao" rows="3" required></textarea>
+    <textarea rows="3" required></textarea>
 
-    <label>Selecione no mapa o local do poste</label>
+    <button type="button" onclick="usarMinhaLocalizacao()">
+      Usar minha localização atual
+    </button>
+
+    <label>Toque no mapa para marcar o local do poste</label>
     <div id="map"></div>
 
     <input type="hidden" id="latitude">
@@ -106,15 +111,39 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-  // MAPA
-  const map = L.map("map").setView([-14.235, -51.9253], 4); // Brasil
+  let map;
+  let marker;
+
+  // Inicializa o mapa
+  map = L.map("map");
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap"
   }).addTo(map);
 
-  let marker;
+  // Tenta pegar a localização automática da pessoa
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function (position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
 
+        map.setView([lat, lng], 17);
+
+        marker = L.marker([lat, lng]).addTo(map);
+        document.getElementById("latitude").value = lat;
+        document.getElementById("longitude").value = lng;
+      },
+      function () {
+        // Se negar localização
+        map.setView([-14.235, -51.9253], 4);
+      }
+    );
+  } else {
+    map.setView([-14.235, -51.9253], 4);
+  }
+
+  // Clique no mapa
   map.on("click", function (e) {
     if (marker) {
       marker.setLatLng(e.latlng);
@@ -126,7 +155,31 @@
     document.getElementById("longitude").value = e.latlng.lng;
   });
 
-  // FORMULÁRIO
+  // Botão usar localização
+  function usarMinhaLocalizacao() {
+    if (!navigator.geolocation) {
+      alert("Geolocalização não suportada.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(function (position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      map.setView([lat, lng], 18);
+
+      if (marker) {
+        marker.setLatLng([lat, lng]);
+      } else {
+        marker = L.marker([lat, lng]).addTo(map);
+      }
+
+      document.getElementById("latitude").value = lat;
+      document.getElementById("longitude").value = lng;
+    });
+  }
+
+  // Envio do formulário
   function enviarReclamacao(event) {
     event.preventDefault();
 
@@ -134,17 +187,18 @@
     const lng = document.getElementById("longitude").value;
 
     if (!lat || !lng) {
-      alert("Por favor, clique no mapa para marcar o local do poste.");
+      alert("Por favor, marque no mapa o local do poste.");
       return;
     }
 
     alert(
       "Reclamação enviada com sucesso!\n\n" +
-      "Local selecionado:\nLatitude: " + lat +
+      "Local registrado:\nLatitude: " + lat +
       "\nLongitude: " + lng
     );
 
     event.target.reset();
+
     if (marker) {
       map.removeLayer(marker);
       marker = null;
@@ -154,4 +208,3 @@
 
 </body>
 </html>
-
