@@ -1,199 +1,157 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <title>Disk Luz – Prefeitura Municipal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet (Mapa gratuito) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f6f8;
+      background: #f2f2f2;
       margin: 0;
     }
+
     header {
-      background: #0b3c6d;
+      background: #2c3e50;
       color: white;
-      padding: 20px;
+      padding: 15px;
       text-align: center;
     }
+
     main {
-      max-width: 700px;
-      margin: 30px auto;
       background: white;
+      max-width: 520px;
+      margin: 20px auto;
       padding: 20px;
-      border-radius: 8px;
+      border-radius: 5px;
     }
+
     label {
       display: block;
-      margin-top: 12px;
+      margin-top: 10px;
       font-weight: bold;
     }
-    input, button {
+
+    input, textarea, button {
       width: 100%;
-      padding: 10px;
-      margin-top: 6px;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
     }
+
     button {
-      background: #0b3c6d;
+      margin-top: 15px;
+      background: #2c3e50;
       color: white;
       border: none;
-      margin-top: 20px;
       cursor: pointer;
     }
+
+    #map {
+      height: 300px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+    }
+
     footer {
       text-align: center;
-      font-size: 12px;
+      font-size: 10px;
       color: #555;
-      margin: 20px;
+      margin: 20px 0;
     }
   </style>
-</head><style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f2f2f2;
-    margin: 0;
-  }
-
-  header {
-    background: #2c3e50;
-    color: white;
-    padding: 15px;
-    text-align: center;
-  }
-
-  main {
-    background: white;
-    max-width: 500px;
-    margin: 20px auto;
-    padding: 20px;
-    border-radius: 5px;
-  }
-
-  label {
-    display: block;
-    margin-top: 10px;
-  }
-
-  input, textarea, button {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-  }
-
-  button {
-    margin-top: 15px;
-    background: #2c3e50;
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
-
-  footer {
-    text-align: center;
-    font-size: 10px;
-    color: #555;
-    margin-top: 20px;
-  }
-</style>
+</head>
 
 <body>
 
 <header>
-  <h1>Disk Luz</h1>
-  <p>Canal oficial para registro de problemas na iluminação pública</p>
+  <h2>Disk Luz</h2>
+  <p>Serviço de Iluminação Pública</p>
 </header>
 
 <main>
-  <main>
-  <h2>Registrar Reclamação</h2>
-
-  <form>
+  <form onsubmit="enviarReclamacao(event)">
+    
     <label>Nome completo</label>
-    <input type="text" required>
+    <input type="text" id="nome" required>
 
-    <label>Data de nascimento</label>
-    <input type="date" required>
-
-    <label>Endereço completo</label>
-    <input type="text" required>
-
-    <label>Telefone / WhatsApp</label>
-    <input type="text" required>
+    <label>Endereço</label>
+    <input type="text" id="endereco" required>
 
     <label>Descrição do problema</label>
-    <textarea rows="4" required></textarea>
+    <textarea id="descricao" rows="3" required></textarea>
+
+    <label>Selecione no mapa o local do poste</label>
+    <div id="map"></div>
+
+    <input type="hidden" id="latitude">
+    <input type="hidden" id="longitude">
 
     <button type="submit">Enviar Reclamação</button>
-  </form><form onsubmit="enviarReclamacao(event)">
-<label>Ponto do problema</label>
-<input type="text" placeholder="Ex: Rua X, próximo ao nº 123" required>
-
+  </form>
 </main>
 
-
 <footer>
-  Prefeitura Municipal – Serviço de Iluminação Pública
-</footer><footer>
-  Prefeitura Municipal – Serviço de Iluminação Pública  
-  <br>
+  Prefeitura Municipal – Iluminação Pública<br>
   Criado por Zeirton Luna
 </footer>
 
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
+  // MAPA
+  const map = L.map("map").setView([-14.235, -51.9253], 4); // Brasil
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(map);
+
+  let marker;
+
+  map.on("click", function (e) {
+    if (marker) {
+      marker.setLatLng(e.latlng);
+    } else {
+      marker = L.marker(e.latlng).addTo(map);
+    }
+
+    document.getElementById("latitude").value = e.latlng.lat;
+    document.getElementById("longitude").value = e.latlng.lng;
+  });
+
+  // FORMULÁRIO
   function enviarReclamacao(event) {
     event.preventDefault();
 
-    alert("Reclamação enviada com sucesso! A prefeitura analisará sua solicitação.");
+    const lat = document.getElementById("latitude").value;
+    const lng = document.getElementById("longitude").value;
+
+    if (!lat || !lng) {
+      alert("Por favor, clique no mapa para marcar o local do poste.");
+      return;
+    }
+
+    alert(
+      "Reclamação enviada com sucesso!\n\n" +
+      "Local selecionado:\nLatitude: " + lat +
+      "\nLongitude: " + lng
+    );
 
     event.target.reset();
-  }
-</script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-  const firebaseConfig = {// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCE4V1PYdws1lxQrvjux8opyGmmb-1qhzY",
-  authDomain: "disk-luz.firebaseapp.com",
-  projectId: "disk-luz",
-  storageBucket: "disk-luz.firebasestorage.app",
-  messagingSenderId: "681363414418",
-  appId: "1:681363414418:web:d23b4b94d5452af95a354b"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  window.enviarReclamacao = async function(event) {
-    event.preventDefault();
-
-    const nome = document.getElementById("nome").value;
-    const nascimento = document.getElementById("nascimento").value;
-    const endereco = document.getElementById("endereco").value;
-    const telefone = document.getElementById("telefone").value;
-
-    await addDoc(collection(db, "reclamacoes"), {
-      nome,
-      nascimento,
-      endereco,
-      telefone,
-      data: new Date()
-    });
-
-    alert("Reclamação registrada com sucesso!");
-    event.target.reset();
+    if (marker) {
+      map.removeLayer(marker);
+      marker = null;
+    }
   }
 </script>
 
 </body>
 </html>
+
