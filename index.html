@@ -47,7 +47,55 @@
       margin: 20px;
     }
   </style>
-</head>
+</head><style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    margin: 0;
+  }
+
+  header {
+    background: #2c3e50;
+    color: white;
+    padding: 15px;
+    text-align: center;
+  }
+
+  main {
+    background: white;
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 5px;
+  }
+
+  label {
+    display: block;
+    margin-top: 10px;
+  }
+
+  input, textarea, button {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+  }
+
+  button {
+    margin-top: 15px;
+    background: #2c3e50;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 10px;
+    color: #555;
+    margin-top: 20px;
+  }
+</style>
+
 <body>
 
 <header>
@@ -76,13 +124,30 @@
     <textarea rows="4" required></textarea>
 
     <button type="submit">Enviar Reclamação</button>
-  </form>
+  </form><form onsubmit="enviarReclamacao(event)">
+<label>Ponto do problema</label>
+<input type="text" placeholder="Ex: Rua X, próximo ao nº 123" required>
+
 </main>
 
 
 <footer>
   Prefeitura Municipal – Serviço de Iluminação Pública
+</footer><footer>
+  Prefeitura Municipal – Serviço de Iluminação Pública  
+  <br>
+  Criado por Zeirton Luna
 </footer>
+
+<script>
+  function enviarReclamacao(event) {
+    event.preventDefault();
+
+    alert("Reclamação enviada com sucesso! A prefeitura analisará sua solicitação.");
+
+    event.target.reset();
+  }
+</script>
 
 </body>
 </html>
